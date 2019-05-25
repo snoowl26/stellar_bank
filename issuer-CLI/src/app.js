@@ -2,6 +2,7 @@
 
 'use strict'
 
+console.log('dupa');
 const program = require('commander')
 program
   .version('0.0.1')
