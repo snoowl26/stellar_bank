@@ -1,40 +1,21 @@
-const queries = require('./queries')
+const queries = require('./queries');
 
-async function validateInvestor(email, token) {
-	const result = await queries.getUserByEmailAndToken(email, token);
+const validateInvestor = (email, token) => {
+	return new Promise(async (resolve, reject) => {
+		const result = await queries.getUserByEmailAndToken(email, token);
 
-	if (!result) {
-		return 0;
-	}
+		if (!result) {
+			return reject(new Error("[VALIDATE_INVESTOR] Database error"));
+		}
 
-	if (result.rowCount !== 0) {
-		return 1;
-	}
-
-	return 2;
-}
-
-function createAccount(pubkey) {
-	console.log("DEBUG: pubk:" + pubkey);
-	return new Promise((resolve, reject) => {
-		request.get(
-			{url: 'https://friendbot.stellar.org', qs: { addr: pubkey }, json: true},
-			(error, response, body) => {
-				if (error) {
-					return reject(new Error('error=' + error.message));
-				} else if (response.statusCode !== 200) {
-					const msg = `response.statusCode=${response.statusCode}
-          response.body='${JSON.stringify(response.body)}`;
-					return reject(new Error(msg));
-				}
-				else {
-					resolve(body)
-				}
-			});
+		if (result.rowCount !== 0) {
+			resolve({status: 201, data: {}, message: "Investor exists"});
+		} else {
+			resolve({status: 200, data: result, message: "Investor does not exist"});
+		}
 	});
 }
 
 module.exports = {
-	validateInvestor,
-	createAccount
+	validateInvestor
 };

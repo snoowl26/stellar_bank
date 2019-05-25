@@ -7,12 +7,13 @@ const api = express.Router()
 
 api.post('/register', async (req, res) => {
   const {token, email, publicKey} = req.body;
-  const result = await utils.validateInvestor(email, token);
-	if (result === 0) {
-		return res.status(500).send('DB error');
-	}
-	if (result === 1) {
-		return res.status(201).send('Account balance: XXX');
+  const result = await utils.validateInvestor(email, token)
+		.catch((error) => {
+			return {status: 500, message: error.message};
+		});
+
+	if (result.status !== 200) {
+		return res.status(result.status).send(result.message);
 	}
 
 	if (token) {

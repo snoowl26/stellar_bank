@@ -1,7 +1,7 @@
 const express = require('express')
 const axios = require('axios')
 
-const stellarUtils = require('./stellar_utils')
+const stellarUtils = require('../../stellar_utils')
 const queries = require('./queries') 
 
 const api = express.Router()
