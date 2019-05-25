@@ -2,6 +2,7 @@ const express = require('express')
 const axios = require('axios')
 const queries = require('./queries') 
 const utils = require('./utils')
+const StellarSDK = require('stellar-sdk')
 const api = express.Router()
 
 api.post('/register', async (req, res) => {
@@ -14,33 +15,59 @@ api.post('/register', async (req, res) => {
 		return res.status(201).send('Account balance: XXX');
 	}
 
-  const validateUserRes = axios.post(`http://localhost:3002/api/validate`, {email})
-    .then((response) => {
-      if (response.status !== 200) {
+	if (token) {
+		const validateUserRes = axios.post(`http://localhost:3002/api/validate`, {email})
+			.then((response) => {
+				if (response.status !== 200) {
+					console.log(`[VALIDATE_USER] Something went wrong. Response ${response}`);
+				}
+				return response.status;
+			}).catch((error) => {
+				console.log(`[VALIDATE_USER] Something went wrong: ${error.message}`);
+				return 500;
+			});
+
+		const validateTokenRes = axios.post(`http://localhost:3003/api/validate_token`, {token})
+			.then((response) => {
+				if (response.status !== 200) {
+					console.log(`[VALIDATE_USER] Something went wrong. Response ${response}`);
+				}
+				return response.status;
+			}).catch((error) => {
+				console.log(`[VALIDATE_TOKEN] Something went wrong: ${error.message}`);
+				return 500;
+			});
+
+		if (await validateUserRes === 200 && await validateTokenRes === 200) {
+			return res.status(201).send("Creating account...");
+		}
+		return res.status(200).send("Created account.");
+	} else {
+		registerWithoutToken(email);
+	}
+});
+
+function registerWithoutToken(email) {
+	axios.post(`http://localhost:3002/api/validate`, {email})
+		.then((response) => {
+			if (response.status !== 200) {
 				console.log(`[VALIDATE_USER] Something went wrong. Response ${response}`);
-      }
-      return response.status;
-    }).catch((error) => {
+				return response;
+			}
+			const keyPair = StellarSDK.Keypair.random();
+      utils.createAccount(keyPair.publicKey())
+        .then((body) => {
+					console.log(`Account name      : ${email}`)
+					console.log(`Seed (secret key) : ${keyPair.secret()}`)
+					console.log(`Public key        : ${keyPair.publicKey()}`)
+					console.log(`Transaction hash  : ${body.hash}`)
+					console.log(`Transaction ledger: ${body.ledger}`);
+				});
+		}).catch((error) => {
 			console.log(`[VALIDATE_USER] Something went wrong: ${error.message}`);
 			return 500;
-    });
-
-  const validateTokenRes = axios.post(`http://localhost:3003/api/validate_token`, {token})
-    .then((response) => {
-      if (response.status !== 200) {
-				console.log(`[VALIDATE_USER] Something went wrong. Response ${response}`);
-      }
-      return response.status;
-    }).catch((error) => {
-      console.log(`[VALIDATE_TOKEN] Something went wrong: ${error.message}`);
-      return 500;
-    });
-
-  if (await validateUserRes === 200 && await validateTokenRes === 200) {
-		return res.status(201).send("Creating account...");
-  }
-	return res.status(200).send("Created account.");
-});
+		});
+}
 
 api.post('/validate_investor', async (req, res) => {
   const {token, email, publicKey} = req.body;
