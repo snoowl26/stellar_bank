@@ -12,6 +12,8 @@ app.use(helmet())
 app.use('/api/validate', async (req, res, next) => {
   const { email } = req.body
 
+  console.log("Validate KYC");
+
   if (!email) {
     return res.status(400).send('Email data not sent')
   }

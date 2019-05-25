@@ -62,3 +62,8 @@ typings/
 
 # next.js build output
 .next
+
+schema.sql
+*config.js
+
+.idea
