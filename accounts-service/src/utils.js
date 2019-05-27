@@ -1,5 +1,6 @@
 const queries = require('./queries');
 const stellarUtils = require('../../stellar_utils');
+const colors = require('colors');
 const axios = require('axios');
 
 const validateInvestor = (email, token) => {
@@ -18,23 +19,23 @@ const validateInvestor = (email, token) => {
 	});
 };
 
-function registerWithoutToken(email) {
-	return new Promise(async (resolve, reject) => {
-		const result = await handleValidate(email);
-		if (result.status !== 200) {
-			reject(result);
-		}
-		resolve(await stellarUtils.createAccount(email));
-	});
-}
-
-function registerWithToken(email, token) {
+function register(email, token, pubk) {
 	return new Promise(async (resolve, reject) => {
 		const validateUserRes = await handleValidate(email);
 		if (validateUserRes.status === 200) {
 			const validateTokenRes = await handleValidateToken(token);
 			if (validateTokenRes.status === 200) {
-				resolve("Creating account...");
+				const investorSeed = await queries.getInvestorSeed(pubk);
+				const issuerPubk = await queries.getIssuerPubk(token);
+				return stellarUtils.createTrustLine(token, investorSeed, issuerPubk)
+					.then(async (result) => {
+            await queries.saveAccount(email, token, pubk);
+            console.log(`SUCCESS. ${token} ${email} : Register`.green);
+						resolve(result);
+					}).catch((error) => {
+            console.log(`FAIL. ${token} ${email} : Register`.red);
+						reject(error.message);
+				});
 			}
 		}
 		reject("Register with token failed")
@@ -50,6 +51,7 @@ function handleValidate(email) {
 			}
 			return {status: response.status, data: response, message: message};
 		}).catch((error) => {
+      console.log(`FAIL ${email}: user validation`.red);
 			return {status: 500, data: {}, message: `[VALIDATE_USER] Something went wrong: ${error.message}`};
 		});
 }
@@ -63,12 +65,12 @@ function handleValidateToken(token) {
 			}
 			return {status: response.status, data: response, message: message};
 		}).catch((error) => {
+      console.log(`FAIL ${token}: token validation`.red);
 			return {status: 500, data: {}, message: `[VALIDATE_TOKEN] Something went wrong: ${error.message}`};
 	});
 }
 
 module.exports = {
 	validateInvestor,
-	registerWithoutToken,
-	registerWithToken
+  register
 };

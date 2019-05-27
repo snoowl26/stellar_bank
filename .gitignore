@@ -63,13 +63,5 @@ typings/
 # next.js build output
 .next
 
-<<<<<<< HEAD
 .idea
 *config.js
-schema.sql
-=======
-schema.sql
-*config.js
-
-.idea
->>>>>>> register_account

@@ -6,6 +6,10 @@ const api = express.Router();
 
 api.post('/register', async (req, res) => {
   const {token, email, publicKey} = req.body;
+  if (!token || !email || !publicKey) {
+    return res.status(404).send("Email, ICO Token and publicKey required for registering an account.");
+  }
+
   const result = await utils.validateInvestor(email, token)
 		.catch((error) => {
 			return {status: 500, message: error.message};
@@ -15,12 +19,13 @@ api.post('/register', async (req, res) => {
 		return res.status(result.status).send(result.message);
 	}
 
-	// Add error handling
-	if (token) {
-		return res.status(200).send(await utils.registerWithToken(email, token));
-	} else {
-		return res.status(200).send(await utils.registerWithoutToken(email));
-	}
+  try {
+    await utils.register(email, token, publicKey);
+    return res.status(200).send("Account created");
+  }
+  catch (error) {
+    return res.status(501).send(error)
+  }
 });
 
 api.post('/validate_investor', async (req, res) => {

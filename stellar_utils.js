@@ -69,7 +69,7 @@ const fundAccount = (name, sponsorSeed) => {
 }
 
 const createTrustLine = (token, distributorSeed, issuerPubk) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const distributor = StellarSDK.Keypair.fromSecret(distributorSeed)
 
     StellarSDK.Network.useTestNetwork()
@@ -91,14 +91,14 @@ const createTrustLine = (token, distributorSeed, issuerPubk) => {
       })
       .then((result) => {
         console.log(`SUCCESS. ${token} trusline: Distributor -> issuer`.green)
-        resolve()
+        resolve();
       })
       .catch((error) => {
         console.error(`${error}`.red)
         reject(new Error(error))
       });
   })
-}
+};
 
 const authorizeTrustLine = (token, distributorPubk, issuerSeed) => {
   return new Promise((resolve, reject) => {
