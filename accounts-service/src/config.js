@@ -1,5 +1,5 @@
 module.exports = {
-  uS_port: 3005,
+  uS_port: 3001,
   DB_user: 'tomasz',
   DB_hostname: 'localhost',
   DB_database: 'stellar_bank',

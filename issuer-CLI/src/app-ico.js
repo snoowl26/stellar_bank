@@ -53,7 +53,7 @@ else {
 sponsor
   .then((data) => {
     return axios.post(
-      `http://localhost:3003/api/ico`,
+      `http://localhost:3005/api/ico`,
       {token: program.token, amount: program.amount, sponsorSeed: data.seed}
     )
   })

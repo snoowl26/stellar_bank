@@ -5,26 +5,25 @@ const colors = require('colors');
 const axios = require('axios');
 
 const createAccount = (username) => {
-	const newAcc = StellarSDK.Keypair.random();
-	const account = { username: username };
+  const newAcc = StellarSDK.Keypair.random();
+  const account = { username: username };
 
-	return new Promise((resolve, reject) => {
-		axios.get(`https://friendbot.stellar.org?addr=${newAcc.publicKey()}`)
-			.then((response) => {
-				const { data, status } = response;
-				if (status !== 200) {
-					return new Error(`Status code !== 200. response.body=${JSON.stringify(body)}`)
-				}
+  return new Promise((resolve, reject) => {
+    axios.get(`https://friendbot.stellar.org?addr=${newAcc.publicKey()}`)
+      .then((response) => {
+        const { data, status } = response;
+        if (status !== 200) {
+          return new Error(`Status code !== 200. response.body=${JSON.stringify(body)}`)
+        }
 
-				account.seed = newAcc.secret();
-				account.publicKey = newAcc.publicKey();
-				account.result = StellarSDK.xdr.TransactionResult.fromXDR(data.result_xdr, 'base64');
-				resolve(account)
-			})
-			.catch((error) => {
-				return reject(error)
-			})
-	});
+        account.seed = newAcc.secret();
+        account.publicKey = newAcc.publicKey();
+        account.result = StellarSDK.xdr.TransactionResult.fromXDR(data.result_xdr, 'base64');
+        resolve(account)
+      }).catch((error) => {
+        return reject(error)
+      })
+  });
 };
 
 const fundAccount = (name, sponsorSeed) => {

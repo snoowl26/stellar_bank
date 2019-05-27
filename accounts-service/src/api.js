@@ -11,13 +11,13 @@ api.post('/register', async (req, res) => {
   }
 
   const result = await utils.validateInvestor(email, token)
-		.catch((error) => {
-			return {status: 500, message: error.message};
-		});
+    .catch((error) => {
+      return {status: 500, message: error.message};
+    });
 
-	if (result.status !== 200) {
-		return res.status(result.status).send(result.message);
-	}
+  if (result.status !== 200) {
+	  return res.status(result.status).send(result.message);
+  }
 
   try {
     await utils.register(email, token, publicKey);
