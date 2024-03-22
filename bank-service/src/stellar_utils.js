@@ -8,8 +8,8 @@ const fundAccount = (name, sponsorSeed) => {
     const newAcc = StellarSDK.Keypair.random();
     const sponsor = StellarSDK.Keypair.fromSecret(sponsorSeed)
     
-    StellarSDK.Network.useTestNetwork();
-    const server = new StellarSDK.Server('https://horizon-testnet.stellar.org');
+    StellarSDK.Network.usepubnetwork();
+    const server = new StellarSDK.Server('https://horizon-pubnet.stellar.org');
     
     // TODO: handle errors
     const sponsorAccount = await server.loadAccount(sponsor.publicKey())
@@ -79,8 +79,8 @@ const changeTrustLineAuth = (token, trustSeekerSeed, issuerPubKey) => {
   return new Promise((resolve, reject) => {
     const trustSeeker = StellarSDK.Keypair.fromSecret(trustSeekerSeed)
     
-    StellarSDK.Network.useTestNetwork()
-    const server = new StellarSDK.Server('https://horizon-testnet.stellar.org')
+    StellarSDK.Network.usepubnetwork()
+    const server = new StellarSDK.Server('https://horizon-pubnet.stellar.org')
     
     server.loadAccount(trustSeeker.publicKey())
       .then((trustSeekerAcc) => {
